@@ -1,0 +1,34 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:e_menza/providers/theme_provider.dart';
+import 'package:e_menza/widgets/subtitle_text.dart';
+import 'package:e_menza/widgets/title_text.dart';
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SubtitleTextWidget(label: "Hello"),
+            const TitelesTextWidget(label: "Hello this is me again"),
+            SwitchListTile(
+                title: Text(themeProvider.getIsDarkTheme
+                    ? "Dark Theme"
+                    : "Light Theme"),
+                value: themeProvider.getIsDarkTheme,
+                onChanged: (value) {
+                  themeProvider.setDarkTheme(themeValue: value);
+                }),
+          ],
+        ),
+      ),
+    );
+  }
+}
