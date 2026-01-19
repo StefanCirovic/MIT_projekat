@@ -3,6 +3,7 @@ import 'package:flutter_iconly/flutter_iconly.dart';
 
 import 'package:e_menza/screens/home_screen.dart';
 import 'package:e_menza/screens/profile_screen.dart';
+import 'package:e_menza/consts/app_colors.dart';
 
 class RootScreen extends StatefulWidget {
   const RootScreen({super.key});
@@ -13,7 +14,7 @@ class RootScreen extends StatefulWidget {
 
 class _RootScreenState extends State<RootScreen> {
   late List<Widget> screens;
-  int currentScreen = 0;
+  int currentScreen = 1;
   late PageController controller;
 
   @override
