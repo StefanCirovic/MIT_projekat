@@ -38,6 +38,7 @@ class _AccountScreenState extends State<AccountScreen> {
         builder: (_) => PurchaseMealsScreen(
           currentBalance: _balance,
           remainingMealsThisMonth: remaining(selectedMeal),
+          preselectedMeal: selectedMeal,
         ),
       ),
     );
@@ -78,8 +79,12 @@ class _AccountScreenState extends State<AccountScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Stanje na računu",
-                        style: TextStyle(color: Colors.black54)),
+                    Text(
+                      "Stanje na računu",
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodySmall?.color,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     Text(
                       "${_balance.toStringAsFixed(0)} RSD",
@@ -119,8 +124,11 @@ class _AccountScreenState extends State<AccountScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(t.label,
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.titleMedium?.color,
+                )),
             const SizedBox(height: 10),
             Row(
               children: [
@@ -150,12 +158,20 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _miniStat(String title, String value) {
     return Column(
       children: [
-        Text(title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.black54)),
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodySmall?.color,
+          ),
+        ),
         const SizedBox(height: 4),
         Text(value,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).textTheme.bodyMedium?.color,
+            )),
       ],
     );
   }

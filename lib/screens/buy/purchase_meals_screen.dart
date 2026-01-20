@@ -34,17 +34,26 @@ class PurchaseMealsScreen extends StatefulWidget {
     super.key,
     required this.currentBalance,
     required this.remainingMealsThisMonth,
+    required this.preselectedMeal,
   });
 
   final double currentBalance;
   final int remainingMealsThisMonth;
+  final MealTime preselectedMeal;
 
   @override
   State<PurchaseMealsScreen> createState() => _PurchaseMealsScreenState();
 }
 
 class _PurchaseMealsScreenState extends State<PurchaseMealsScreen> {
-  MealTime _selected = MealTime.lunch;
+  late MealTime _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = widget.preselectedMeal;
+  }
+
   int _qty = 1;
 
   final Map<MealTime, double> _prices = const {
@@ -118,7 +127,8 @@ class _PurchaseMealsScreenState extends State<PurchaseMealsScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black12),
+                    border: Border.all(
+                        color: const Color.fromARGB(255, 38, 88, 255)),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -157,7 +167,9 @@ class _PurchaseMealsScreenState extends State<PurchaseMealsScreen> {
                       "Ukupno za kupovinu:",
                       "${_total.toStringAsFixed(0)} RSD",
                       valueStyle: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     if (_errorText != null) ...[
                       const SizedBox(height: 10),
@@ -205,7 +217,9 @@ class _PurchaseMealsScreenState extends State<PurchaseMealsScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(color: Colors.black54)),
+        Text(label,
+            style:
+                TextStyle(color: Theme.of(context).textTheme.bodySmall?.color)),
         Text(value,
             style: valueStyle ?? const TextStyle(fontWeight: FontWeight.w600)),
       ],
