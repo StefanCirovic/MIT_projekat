@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:e_menza/consts/theme_data.dart';
 import 'package:e_menza/providers/theme_provider.dart';
-import 'package:e_menza/screens/home_screen.dart';
 import 'package:e_menza/screens/root_screen.dart';
 import 'package:e_menza/screens/auth/login.dart';
 import 'package:e_menza/screens/auth/register.dart';
@@ -36,7 +35,6 @@ class MyApp extends StatelessWidget {
                 theme: Styles.themeData(
                     isDarkTheme: themeProvider.getIsDarkTheme,
                     context: context),
-                //home: const RootScreen(),
                 home: const LoginScreen(),
                 routes: {
                   RootScreen.routeName: (context) => const RootScreen(),

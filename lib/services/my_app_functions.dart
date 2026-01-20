@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:skriptarnica/services/assets_manager.dart';
-import 'package:skriptarnica/widgets/subtitle_text.dart';
-import 'package:skriptarnica/widgets/title_text.dart';
+import 'package:e_menza/services/assets_manager.dart';
+import 'package:e_menza/widgets/subtitle_text.dart';
+import 'package:e_menza/widgets/title_text.dart';
 
 class MyAppFunctions {
   static Future<void> showErrorOrWarningDialog({

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
-
 import 'package:e_menza/screens/home_screen.dart';
 import 'package:e_menza/screens/profile_screen.dart';
+import 'package:e_menza/screens/buy/buy_screen.dart';
 import 'package:e_menza/consts/app_colors.dart';
 
 class RootScreen extends StatefulWidget {
@@ -15,7 +15,7 @@ class RootScreen extends StatefulWidget {
 
 class _RootScreenState extends State<RootScreen> {
   late List<Widget> screens;
-  int currentScreen = 1;
+  int currentScreen = 0;
   late PageController controller;
 
   @override
@@ -24,6 +24,7 @@ class _RootScreenState extends State<RootScreen> {
 
     screens = const [
       HomeScreen(),
+      AccountScreen(),
       ProfileScreen(),
     ];
     controller = PageController(initialPage: currentScreen);
@@ -50,6 +51,11 @@ class _RootScreenState extends State<RootScreen> {
             selectedIcon: Icon(IconlyBold.home),
             icon: Icon(IconlyLight.home),
             label: "Home",
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(IconlyBold.buy),
+            icon: Icon(IconlyLight.buy),
+            label: "Buy",
           ),
           NavigationDestination(
             selectedIcon: Icon(IconlyBold.profile),
