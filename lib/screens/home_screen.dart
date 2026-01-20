@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:e_menza/providers/theme_provider.dart';
-import 'package:e_menza/widgets/subtitle_text.dart';
+import 'package:e_menza/consts/app_constants.dart';
+import 'package:e_menza/services/assets_manager.dart';
 import 'package:e_menza/widgets/title_text.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -9,24 +8,93 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    Size size = MediaQuery.of(context).size;
+
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SubtitleTextWidget(label: "Hello"),
-            const TitelesTextWidget(label: "Hello this is me again"),
-            SwitchListTile(
-                title: Text(themeProvider.getIsDarkTheme
-                    ? "Dark Theme"
-                    : "Light Theme"),
-                value: themeProvider.getIsDarkTheme,
-                onChanged: (value) {
-                  themeProvider.setDarkTheme(themeValue: value);
-                }),
-          ],
+      appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Image.asset("${AssetsManager.imagePath}/logo.png"),
+        ),
+        title: const Text("E-Menza"),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const TitelesTextWidget(label: "Danasnji obroci"),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: size.height * 0.2,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: AppConstants.mealTimeCategories.length,
+                  itemBuilder: (context, index) {
+                    final meal = AppConstants.mealTimeCategories[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 12.0),
+                      child: Column(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.asset(
+                              meal.image,
+                              width: 120,
+                              height: 80,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            meal.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 24),
+              const TitelesTextWidget(label: "Tip obroka"),
+              const SizedBox(height: 12),
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 3,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                children: List.generate(
+                  AppConstants.mealTimeCategories.length,
+                  (index) {
+                    final meal = AppConstants.mealTimeCategories[index];
+                    return Column(
+                      children: [
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.asset(
+                              meal.image,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          meal.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
