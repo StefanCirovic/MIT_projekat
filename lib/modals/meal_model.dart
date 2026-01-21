@@ -5,7 +5,7 @@ class MealModel {
   final String name;
   final double price;
   final MealType? type; // main / dessert / drink
-  final String mealTime; // breakfast / lunch / dinner
+  final String? mealTime; // breakfast / lunch / dinner
   final String image;
   final int calories;
   final bool isAvailable;
