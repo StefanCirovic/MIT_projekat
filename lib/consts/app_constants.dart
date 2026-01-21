@@ -14,7 +14,7 @@ class AppConstants {
     MealModel(
       id: "breakfast",
       name: "Doručak",
-      image: "${AssetsManager.imagePath}/categories/breakfast.png",
+      image: "${AssetsManager.imagePath}/categories/breakfast.jpg",
       type: null,
       mealTime: "breakfast",
       price: 0.0,
@@ -24,7 +24,7 @@ class AppConstants {
     MealModel(
       id: "lunch",
       name: "Ručak",
-      image: "${AssetsManager.imagePath}/categories/lunch.png",
+      image: "${AssetsManager.imagePath}/categories/lunch.jpg",
       type: null,
       mealTime: "lunch",
       price: 0.0,
@@ -34,7 +34,7 @@ class AppConstants {
     MealModel(
       id: "dinner",
       name: "Večera",
-      image: "${AssetsManager.imagePath}/categories/dinner.png",
+      image: "${AssetsManager.imagePath}/categories/dinner.jpg",
       type: null,
       mealTime: "dinner",
       price: 0.0,

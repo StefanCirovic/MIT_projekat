@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:e_menza/consts/app_constants.dart';
 import 'package:e_menza/services/assets_manager.dart';
 import 'package:e_menza/widgets/title_text.dart';
+import 'package:e_menza/screens/mealDetails_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -20,59 +21,35 @@ class HomeScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const TitelesTextWidget(label: "Danasnji obroci"),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: size.height * 0.2,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: AppConstants.mealTimeCategories.length,
-                  itemBuilder: (context, index) {
-                    final meal = AppConstants.mealTimeCategories[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 12.0),
-                      child: Column(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.asset(
-                              meal.image,
-                              width: 120,
-                              height: 80,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            meal.name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 24),
-              const TitelesTextWidget(label: "Tip obroka"),
-              const SizedBox(height: 12),
-              GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 3,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                children: List.generate(
-                  AppConstants.mealTimeCategories.length,
-                  (index) {
-                    final meal = AppConstants.mealTimeCategories[index];
-                    return Column(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 24),
+            const TitelesTextWidget(label: "Tip obroka"),
+            const SizedBox(height: 12),
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 1,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 2.3,
+              children: List.generate(
+                AppConstants.mealTimeCategories.length,
+                (index) {
+                  final meal = AppConstants.mealTimeCategories[index];
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MealDetailsScreen(meal: meal),
+                        ),
+                      );
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Expanded(
                           child: ClipRRect(
@@ -89,12 +66,12 @@ class HomeScreen extends StatelessWidget {
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ],
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
