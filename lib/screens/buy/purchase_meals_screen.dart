@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:e_menza/modals/student_status.dart';
+import 'package:e_menza/providers/student_providers.dart';
 
 enum MealTime { breakfast, lunch, dinner }
 
@@ -35,11 +37,13 @@ class PurchaseMealsScreen extends StatefulWidget {
     required this.currentBalance,
     required this.remainingMealsThisMonth,
     required this.preselectedMeal,
+    required this.studentStatus,
   });
 
   final double currentBalance;
   final int remainingMealsThisMonth;
   final MealTime preselectedMeal;
+  final StudentStatus studentStatus;
 
   @override
   State<PurchaseMealsScreen> createState() => _PurchaseMealsScreenState();
@@ -56,13 +60,23 @@ class _PurchaseMealsScreenState extends State<PurchaseMealsScreen> {
 
   int _qty = 1;
 
-  final Map<MealTime, double> _prices = const {
-    MealTime.breakfast: 150.0,
-    MealTime.lunch: 300.0,
-    MealTime.dinner: 250.0,
-  };
+  double basePrice(MealTime t) {
+    switch (t) {
+      case MealTime.breakfast:
+        return 120;
+      case MealTime.lunch:
+        return 250;
+      case MealTime.dinner:
+        return 220;
+    }
+  }
 
-  double get _total => _prices[_selected]! * _qty;
+  double mealPrice(MealTime t) {
+    final p = basePrice(t);
+    return p * widget.studentStatus.priceMultiplier; // x1.5 za samofinansiranje
+  }
+
+  double get _total => mealPrice(_selected) * _qty;
 
   bool get _canBuy {
     if (_qty <= 0) return false;
@@ -83,7 +97,7 @@ class _PurchaseMealsScreenState extends State<PurchaseMealsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final price = _prices[_selected]!;
+    final price = mealPrice(_selected);
     return Scaffold(
       appBar: AppBar(title: const Text("Kupi obroke")),
       body: Padding(
@@ -104,7 +118,7 @@ class _PurchaseMealsScreenState extends State<PurchaseMealsScreen> {
                 final selected = m == _selected;
                 return ChoiceChip(
                   label: Text(
-                      "${m.label} (${_prices[m]!.toStringAsFixed(0)} RSD)"),
+                      "${m.label} (${mealPrice(m).toStringAsFixed(0)} RSD)"),
                   selected: selected,
                   onSelected: (_) => setState(() => _selected = m),
                 );

@@ -73,7 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 60),
-                Row(
+                const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
                     Text(

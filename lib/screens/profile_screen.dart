@@ -5,15 +5,18 @@ import 'package:e_menza/consts/app_colors.dart';
 import 'package:e_menza/providers/theme_provider.dart';
 import 'package:e_menza/services/assets_manager.dart';
 import 'package:e_menza/widgets/subtitle_text.dart';
-
+import 'package:e_menza/modals/student_status.dart';
 import 'package:e_menza/widgets/title_text.dart';
+import 'package:e_menza/providers/student_providers.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final studentProvider = context.watch<StudentProvider>();
     final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
@@ -66,7 +69,7 @@ class ProfileScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TitelesTextWidget(label: " Stefan Cirovic"),
-                        SubtitleTextWidget(label: "vladacira023@gmail.com")
+                        SubtitleTextWidget(label: "vladacira023@gmail.com"),
                       ],
                     )
                   ],
@@ -85,7 +88,141 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(
                     height: 10,
                   ),
-                  const TitelesTextWidget(label: "General"),
+                  const TitelesTextWidget(label: "Info"),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Index",
+                                  style: TextStyle(fontSize: 13),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  "IT23-2023",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.color,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Status",
+                                  style: TextStyle(fontSize: 13),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  studentProvider.status.label,
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: studentProvider.status ==
+                                            StudentStatus.budget
+                                        ? Colors.green
+                                        : Colors.red,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Broj kartice",
+                                  style: TextStyle(fontSize: 13),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  "0129325",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.color,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Ziro racun",
+                                  style: TextStyle(fontSize: 13),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  "170-00219342-908",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.color,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(
                     height: 10,
                   ),

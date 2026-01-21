@@ -24,7 +24,7 @@ class _RootScreenState extends State<RootScreen> {
 
     screens = const [
       HomeScreen(),
-      AccountScreen(),
+      BuyScreen(),
       ProfileScreen(),
     ];
     controller = PageController(initialPage: currentScreen);

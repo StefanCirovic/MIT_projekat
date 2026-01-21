@@ -1,15 +1,18 @@
+import 'package:e_menza/providers/student_providers.dart';
 import 'package:flutter/material.dart';
 import 'purchase_meals_screen.dart';
+import 'package:e_menza/modals/student_status.dart';
+import 'package:provider/provider.dart';
 
-class AccountScreen extends StatefulWidget {
-  static const routeName = "/AccountScreen";
-  const AccountScreen({super.key});
+class BuyScreen extends StatefulWidget {
+  static const routeName = "/BuyScreen";
+  const BuyScreen({super.key});
 
   @override
-  State<AccountScreen> createState() => _AccountScreenState();
+  State<BuyScreen> createState() => _AccountScreenState();
 }
 
-class _AccountScreenState extends State<AccountScreen> {
+class _AccountScreenState extends State<BuyScreen> {
   double _balance = 5050.0;
   final Map<MealTime, int> _monthlyLimit = {
     MealTime.breakfast: 30,
@@ -32,6 +35,7 @@ class _AccountScreenState extends State<AccountScreen> {
   int remaining(MealTime t) => _monthlyLimit[t]! - _usedThisMonth[t]!;
 
   Future<void> _openPurchase(MealTime selectedMeal) async {
+    final studentStatus = context.read<StudentProvider>().status;
     final result = await Navigator.push<PurchaseResult>(
       context,
       MaterialPageRoute(
@@ -39,6 +43,7 @@ class _AccountScreenState extends State<AccountScreen> {
           currentBalance: _balance,
           remainingMealsThisMonth: remaining(selectedMeal),
           preselectedMeal: selectedMeal,
+          studentStatus: studentStatus,
         ),
       ),
     );
