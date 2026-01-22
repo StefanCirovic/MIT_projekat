@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:e_menza/consts/validator.dart';
+import 'package:e_menza/services/assets_manager.dart';
+import 'package:e_menza/services/my_app_functions.dart';
 import 'package:e_menza/widgets/subtitle_text.dart';
 import 'package:e_menza/widgets/title_text.dart';
+import 'package:e_menza/screens/root_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   static const routName = "/RegisterScreen";
   const RegisterScreen({super.key});
-
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
@@ -23,14 +26,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _passwordFocusNode,
       _repeatPasswordFocusNode;
   final _formkey = GlobalKey<FormState>();
-
+  XFile? _pickedImage;
   @override
   void initState() {
     _nameController = TextEditingController();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
     _repeatPasswordController = TextEditingController();
-
+// Focus Nodes
     _nameFocusNode = FocusNode();
     _emailFocusNode = FocusNode();
     _passwordFocusNode = FocusNode();
@@ -40,67 +43,86 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _repeatPasswordController.dispose();
-
-    _nameFocusNode.dispose();
-    _emailFocusNode.dispose();
-    _passwordFocusNode.dispose();
-    _repeatPasswordFocusNode.dispose();
+    if (mounted) {
+      _nameController.dispose();
+      _emailController.dispose();
+      _passwordController.dispose();
+      _repeatPasswordController.dispose();
+// Focus Nodes
+      _nameFocusNode.dispose();
+      _emailFocusNode.dispose();
+      _passwordFocusNode.dispose();
+      _repeatPasswordFocusNode.dispose();
+    }
     super.dispose();
   }
 
   Future<void> _registerFCT() async {
     final isValid = _formkey.currentState!.validate();
     FocusScope.of(context).unfocus();
-
     if (!isValid) return;
-
-    // Ovde ide funkcija za registraciju sa emailom i lozinkom
+    Navigator.of(context).pushReplacementNamed(RootScreen.routeName);
   }
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
       child: Scaffold(
         body: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(8.0),
           child: SingleChildScrollView(
             child: Column(
               children: [
-                const SizedBox(height: 60),
-                const Row(
+// const BackButton(),
+                const SizedBox(
+                  height: 60,
+                ),
+                Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text(
-                      "FTN e-Menza",
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      "${AssetsManager.imagePath}/logo.png",
+                      height: 60,
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      "FTN Script Store",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 30),
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TitelesTextWidget(label: "Welcome!"),
-                      SubtitleTextWidget(
-                          label: "Create your account to continue."),
-                    ],
-                  ),
+                const SizedBox(
+                  height: 30,
                 ),
-                const SizedBox(height: 30),
+                const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TitelesTextWidget(label: "Welcome back!"),
+                        SubtitleTextWidget(label: "Your welcome message"),
+                      ],
+                    )),
+                const SizedBox(
+                  height: 30,
+                ),
+
+                const SizedBox(
+                  height: 30,
+                ),
                 Form(
                   key: _formkey,
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Full Name
                       TextFormField(
                         controller: _nameController,
                         focusNode: _nameFocusNode,
@@ -108,17 +130,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         keyboardType: TextInputType.name,
                         decoration: const InputDecoration(
                           hintText: 'Full Name',
-                          prefixIcon: Icon(Icons.person),
+                          prefixIcon: Icon(
+                            Icons.person,
+                          ),
                         ),
-                        onFieldSubmitted: (_) {
+                        onFieldSubmitted: (value) {
                           FocusScope.of(context).requestFocus(_emailFocusNode);
                         },
-                        validator: (value) =>
-                            MyValidators.displayNamevalidator(value),
+                        validator: (value) {
+                          return MyValidators.displayNamevalidator(value);
+                        },
                       ),
-                      const SizedBox(height: 16.0),
-
-                      // Email
+                      const SizedBox(
+                        height: 16.0,
+                      ),
                       TextFormField(
                         controller: _emailController,
                         focusNode: _emailFocusNode,
@@ -126,18 +151,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         keyboardType: TextInputType.emailAddress,
                         decoration: const InputDecoration(
                           hintText: "Email address",
-                          prefixIcon: Icon(IconlyLight.message),
+                          prefixIcon: Icon(
+                            IconlyLight.message,
+                          ),
                         ),
-                        onFieldSubmitted: (_) {
+                        onFieldSubmitted: (value) {
                           FocusScope.of(context)
                               .requestFocus(_passwordFocusNode);
                         },
-                        validator: (value) =>
-                            MyValidators.emailValidator(value),
+                        validator: (value) {
+                          return MyValidators.emailValidator(value);
+                        },
                       ),
-                      const SizedBox(height: 16.0),
-
-                      // Password
+                      const SizedBox(
+                        height: 16.0,
+                      ),
                       TextFormField(
                         controller: _passwordController,
                         focusNode: _passwordFocusNode,
@@ -145,8 +173,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         keyboardType: TextInputType.visiblePassword,
                         obscureText: obscureText,
                         decoration: InputDecoration(
-                          hintText: "Password",
-                          prefixIcon: const Icon(IconlyLight.lock),
+                          hintText: "***********",
+                          prefixIcon: const Icon(
+                            IconlyLight.lock,
+                          ),
                           suffixIcon: IconButton(
                             onPressed: () {
                               setState(() {
@@ -160,16 +190,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ),
                         ),
-                        onFieldSubmitted: (_) {
+                        onFieldSubmitted: (value) async {
                           FocusScope.of(context)
                               .requestFocus(_repeatPasswordFocusNode);
                         },
-                        validator: (value) =>
-                            MyValidators.passwordValidator(value),
+                        validator: (value) {
+                          return MyValidators.passwordValidator(value);
+                        },
                       ),
-                      const SizedBox(height: 16.0),
-
-                      // Repeat Password
+                      const SizedBox(
+                        height: 16.0,
+                      ),
                       TextFormField(
                         controller: _repeatPasswordController,
                         focusNode: _repeatPasswordFocusNode,
@@ -178,7 +209,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         obscureText: obscureText,
                         decoration: InputDecoration(
                           hintText: "Repeat password",
-                          prefixIcon: const Icon(IconlyLight.lock),
+                          prefixIcon: const Icon(
+                            IconlyLight.lock,
+                          ),
                           suffixIcon: IconButton(
                             onPressed: () {
                               setState(() {
@@ -192,28 +225,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ),
                         ),
-                        onFieldSubmitted: (_) async => await _registerFCT(),
-                        validator: (value) =>
-                            MyValidators.repeatPasswordValidator(
-                          value: value,
-                          password: _passwordController.text,
-                        ),
+                        onFieldSubmitted: (value) async {
+                          await _registerFCT();
+                        },
+                        validator: (value) {
+                          return MyValidators.repeatPasswordValidator(
+                            value: value,
+                            password: _passwordController.text,
+                          );
+                        },
                       ),
-                      const SizedBox(height: 36.0),
-
-                      // Sign Up Button
+                      const SizedBox(
+                        height: 36.0,
+                      ),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.all(16.0),
+                            padding: const EdgeInsets.all(12.0),
+// backgroundColor: Colors.red,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
+                              borderRadius: BorderRadius.circular(
+                                12.0,
+                              ),
                             ),
                           ),
                           icon: const Icon(IconlyLight.addUser),
-                          label: const Text("Sign Up"),
-                          onPressed: _registerFCT,
+                          label: const Text("Sign up"),
+                          onPressed: () async {
+                            await _registerFCT();
+                          },
                         ),
                       ),
                     ],

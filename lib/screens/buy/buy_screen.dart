@@ -1,7 +1,6 @@
 import 'package:e_menza/providers/student_providers.dart';
 import 'package:flutter/material.dart';
 import 'purchase_meals_screen.dart';
-import 'package:e_menza/modals/student_status.dart';
 import 'package:provider/provider.dart';
 
 class BuyScreen extends StatefulWidget {

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:e_menza/modals/student_status.dart';
-import 'package:e_menza/providers/student_providers.dart';
 
 enum MealTime { breakfast, lunch, dinner }
 

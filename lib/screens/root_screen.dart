@@ -3,7 +3,6 @@ import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:e_menza/screens/home_screen.dart';
 import 'package:e_menza/screens/profile_screen.dart';
 import 'package:e_menza/screens/buy/buy_screen.dart';
-import 'package:e_menza/consts/app_colors.dart';
 
 class RootScreen extends StatefulWidget {
   static const String routeName = "/RootScreen";

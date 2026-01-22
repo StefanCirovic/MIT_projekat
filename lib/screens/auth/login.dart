@@ -47,9 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
     FocusScope.of(context).unfocus();
 
     if (!isValid) return;
-
-    // Ovde ide tvoja funkcija za login sa emailom i lozinkom
-    // npr. authController.loginWithEmail(_emailController.text, _passwordController.text)
+    Navigator.of(context).pushReplacementNamed(RootScreen.routeName);
   }
 
   @override
