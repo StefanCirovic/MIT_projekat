@@ -1,6 +1,6 @@
-import 'package:e_menza/modals/meal_model.dart';
+import 'package:e_menza/modals/meal/meal_model.dart';
 import 'package:flutter/material.dart';
-import 'package:e_menza/modals/meal_enum.dart';
+import 'package:e_menza/modals/meal/meal_enum.dart';
 import 'package:provider/provider.dart';
 import 'package:e_menza/providers/student_providers.dart';
 import 'package:e_menza/modals/student_status.dart';

@@ -8,6 +8,7 @@ import 'package:e_menza/widgets/subtitle_text.dart';
 import 'package:e_menza/modals/student_status.dart';
 import 'package:e_menza/widgets/title_text.dart';
 import 'package:e_menza/providers/student_providers.dart';
+import 'package:e_menza/screens/profile/top_up_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -266,6 +267,28 @@ class ProfileScreen extends StatelessWidget {
                 icon: const Icon(Icons.login, color: Colors.white),
                 label: const Text(
                   "Login",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Center(
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.darkPrimary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const TopUpScreen()),
+                  );
+                },
+                icon: const Icon(Icons.account_balance_wallet,
+                    color: Colors.white),
+                label: const Text(
+                  "Uplati sredstva",
                   style: TextStyle(color: Colors.white),
                 ),
               ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
-import 'package:e_menza/screens/home_screen.dart';
-import 'package:e_menza/screens/profile_screen.dart';
+import 'package:e_menza/screens/home/home_screen.dart';
+import 'package:e_menza/screens/profile/profile_screen.dart';
 import 'package:e_menza/screens/buy/buy_screen.dart';
 
 class RootScreen extends StatefulWidget {

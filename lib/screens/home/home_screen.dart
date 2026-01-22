@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:e_menza/consts/app_constants.dart';
 import 'package:e_menza/services/assets_manager.dart';
 import 'package:e_menza/widgets/title_text.dart';
-import 'package:e_menza/screens/mealDetails_screen.dart';
+import 'package:e_menza/screens/home/mealDetails_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

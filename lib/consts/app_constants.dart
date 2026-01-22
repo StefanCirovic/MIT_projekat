@@ -1,4 +1,4 @@
-import 'package:e_menza/modals/meal_model.dart';
+import 'package:e_menza/modals/meal/meal_model.dart';
 import 'package:e_menza/services/assets_manager.dart';
 
 class AppConstants {

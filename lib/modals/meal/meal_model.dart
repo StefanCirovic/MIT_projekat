@@ -1,4 +1,4 @@
-import 'package:e_menza/modals/meal_enum.dart';
+import 'package:e_menza/modals/meal/meal_enum.dart';
 
 class MealModel {
   final String id;
