@@ -6,8 +6,14 @@ import 'package:e_menza/screens/root_screen.dart';
 import 'package:e_menza/screens/auth/login.dart';
 import 'package:e_menza/screens/auth/register.dart';
 import 'package:e_menza/providers/student_providers.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 

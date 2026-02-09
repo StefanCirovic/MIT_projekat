@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "66746967075",
+    "project_id": "emenza-8a1ed",
+    "storage_bucket": "emenza-8a1ed.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:66746967075:android:4f26e68bc0f2f058a13d96",
+        "android_client_info": {
+          "package_name": "com.example.e_menza"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMV2dxnrYxRU03i4n8lO_snLHzcQVNltY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
