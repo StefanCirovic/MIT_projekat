@@ -1,0 +1,12 @@
+{
+  "name": "firebase-import",
+  "version": "1.0.0",
+  "description": "Import student data into Firestore",
+  "main": "importStudents.js",
+  "scripts": {
+    "start": "node importStudents.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  }
+}

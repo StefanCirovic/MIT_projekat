@@ -6,6 +6,8 @@ import 'package:e_menza/screens/root_screen.dart';
 import 'package:e_menza/services/assets_manager.dart';
 import 'package:e_menza/widgets/subtitle_text.dart';
 import 'package:e_menza/widgets/title_text.dart';
+import 'package:provider/provider.dart';
+import 'package:e_menza/providers/student_providers.dart';
 
 class LoginScreen extends StatefulWidget {
   static const String routeName = "/LoginScreen";
@@ -17,28 +19,29 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool obscureText = true;
-  late final TextEditingController _emailController;
-  late final TextEditingController _passwordController;
-  late final FocusNode _emailFocusNode;
-  late final FocusNode _passwordFocusNode;
+  late final TextEditingController _cardNumberController;
+  late final TextEditingController _pinController;
+  late final FocusNode _cardNumberFocusNode;
+  late final FocusNode _pinFocusNode;
   final _formkey = GlobalKey<FormState>();
+  bool _isLoading = false;
 
   @override
   void initState() {
-    _emailController = TextEditingController();
-    _passwordController = TextEditingController();
+    _cardNumberController = TextEditingController();
+    _pinController = TextEditingController();
 
-    _emailFocusNode = FocusNode();
-    _passwordFocusNode = FocusNode();
+    _cardNumberFocusNode = FocusNode();
+    _pinFocusNode = FocusNode();
     super.initState();
   }
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _emailFocusNode.dispose();
-    _passwordFocusNode.dispose();
+    _cardNumberController.dispose();
+    _pinController.dispose();
+    _cardNumberFocusNode.dispose();
+    _pinFocusNode.dispose();
     super.dispose();
   }
 
@@ -47,7 +50,40 @@ class _LoginScreenState extends State<LoginScreen> {
     FocusScope.of(context).unfocus();
 
     if (!isValid) return;
-    Navigator.of(context).pushReplacementNamed(RootScreen.routeName);
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final studentProvider = Provider.of<StudentProvider>(context, listen: false);
+      final success = await studentProvider.login(
+        _cardNumberController.text.trim(),
+        _pinController.text.trim(),
+      );
+
+      if (success) {
+        Navigator.of(context).pushReplacementNamed(RootScreen.routeName);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Pogrešan broj kartice ili PIN'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Greška: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -86,32 +122,39 @@ class _LoginScreenState extends State<LoginScreen> {
                   key: _formkey,
                   child: Column(
                     children: [
-                      // Email
+                      // Broj kartice
                       TextFormField(
-                        controller: _emailController,
-                        focusNode: _emailFocusNode,
+                        controller: _cardNumberController,
+                        focusNode: _cardNumberFocusNode,
                         textInputAction: TextInputAction.next,
-                        keyboardType: TextInputType.emailAddress,
+                        keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
-                          hintText: "Email address",
-                          prefixIcon: Icon(IconlyLight.message),
+                          hintText: "Broj kartice",
+                          prefixIcon: Icon(Icons.credit_card),
                         ),
                         onFieldSubmitted: (_) {
                           FocusScope.of(context)
-                              .requestFocus(_passwordFocusNode);
+                              .requestFocus(_pinFocusNode);
                         },
-                        validator: (value) =>
-                            MyValidators.emailValidator(value),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Unesite broj kartice';
+                          }
+                          if (value.length < 6) {
+                            return 'Broj kartice mora imati najmanje 7 cifara';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 16.0),
 
-                      // Password
+                      // PIN
                       TextFormField(
                         obscureText: obscureText,
-                        controller: _passwordController,
-                        focusNode: _passwordFocusNode,
+                        controller: _pinController,
+                        focusNode: _pinFocusNode,
                         textInputAction: TextInputAction.done,
-                        keyboardType: TextInputType.visiblePassword,
+                        keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                           suffixIcon: IconButton(
                             onPressed: () {
@@ -125,22 +168,31 @@ class _LoginScreenState extends State<LoginScreen> {
                                   : Icons.visibility_off,
                             ),
                           ),
-                          hintText: "Password",
-                          prefixIcon: const Icon(IconlyLight.lock),
+                          hintText: "PIN",
+                          prefixIcon: const Icon(Icons.lock),
                         ),
                         onFieldSubmitted: (_) async => await _loginFct(),
-                        validator: (value) =>
-                            MyValidators.passwordValidator(value),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Unesite PIN';
+                          }
+                          if (value.length < 4) {
+                            return 'PIN mora imati najmanje 4 cifre';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 16.0),
 
-                      // Forgot password
+                      // Forgot PIN
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            
+                          },
                           child: const SubtitleTextWidget(
-                            label: "Forgot password?",
+                            label: "Zaboravio PIN?",
                             fontStyle: FontStyle.italic,
                             textDecoration: TextDecoration.underline,
                           ),
@@ -148,7 +200,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 24.0),
 
-                      // Login Button
+                    
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
@@ -159,32 +211,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           icon: const Icon(Icons.login),
-                          label: const Text("Login"),
-                          onPressed: _loginFct,
+                          label: Text(_isLoading ? "Učitavanje..." : "Login"),
+                          onPressed: _isLoading ? null : _loginFct,
                         ),
                       ),
                       const SizedBox(height: 16.0),
 
-                      // Optional Guest button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.all(16.0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                          ),
-                          child: const Text("Guest?"),
-                          onPressed: () {
-                            Navigator.of(context)
-                                .pushNamed(RootScreen.routeName);
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 16.0),
 
-                      // Sign up redirect
+                    
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
