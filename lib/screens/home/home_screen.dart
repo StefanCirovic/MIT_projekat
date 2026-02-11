@@ -25,7 +25,7 @@ class HomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 24),
-            const TitelesTextWidget(label: "Tip obroka"),
+            const TitlesTextWidget(label: "Tip obroka"),
             const SizedBox(height: 12),
             GridView.count(
               shrinkWrap: true,

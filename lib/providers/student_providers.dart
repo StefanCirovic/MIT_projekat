@@ -38,7 +38,6 @@ class StudentProvider with ChangeNotifier {
     return digest.toString();
   }
 
-  // Login metoda
   Future<bool> login(String cardNumber, String pin) async {
     try {
       final doc = await FirebaseFirestore.instance
@@ -83,7 +82,6 @@ class StudentProvider with ChangeNotifier {
         return 'Broj kartice ne postoji';
       }
 
-      // Čuvamo hash-irani PIN
       final pinHash = _hashPin(pin);
       
       await doc.reference.update({

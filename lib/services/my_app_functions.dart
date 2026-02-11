@@ -80,7 +80,7 @@ class MyAppFunctions {
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Center(
-              child: TitelesTextWidget(
+              child: TitlesTextWidget(
                 label: "Choose option",
               ),
             ),

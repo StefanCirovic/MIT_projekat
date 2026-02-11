@@ -9,10 +9,16 @@ import 'package:e_menza/modals/student_status.dart';
 import 'package:e_menza/widgets/title_text.dart';
 import 'package:e_menza/providers/student_providers.dart';
 import 'package:e_menza/screens/profile/top_up_screen.dart';
+import 'package:e_menza/screens/auth/login.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final studentProvider = context.watch<StudentProvider>();
@@ -36,7 +42,7 @@ class ProfileScreen extends StatelessWidget {
               visible: false,
               child: Padding(
                 padding: EdgeInsets.all(18.0),
-                child: TitelesTextWidget(
+                child: TitlesTextWidget(
                     label: "Please login to have unlimited access"),
               ),
             ),
@@ -66,11 +72,17 @@ class ProfileScreen extends StatelessWidget {
                     const SizedBox(
                       width: 10,
                     ),
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TitelesTextWidget(label: " Stefan Cirovic"),
-                        SubtitleTextWidget(label: "vladacira023@gmail.com"),
+                        TitlesTextWidget(
+                            label: studentProvider.isLoggedIn
+                                ? "${studentProvider.firstName ?? ''} ${studentProvider.lastName ?? ''}"
+                                : "Niste ulogovani"),
+                        SubtitleTextWidget(
+                            label: studentProvider.isLoggedIn
+                                ? studentProvider.email ?? ''
+                                : "Molimo ulogujte se"),
                       ],
                     )
                   ],
@@ -89,7 +101,7 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(
                     height: 10,
                   ),
-                  const TitelesTextWidget(label: "Info"),
+                  const TitlesTextWidget(label: "Info"),
                   Row(
                     children: [
                       Expanded(
@@ -234,7 +246,7 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(
                     height: 10,
                   ),
-                  const TitelesTextWidget(
+                  const TitlesTextWidget(
                     label: "Settings",
                   ),
                   const SizedBox(
@@ -255,22 +267,29 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
-            Center(
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.darkPrimary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
+            if (studentProvider.isLoggedIn)
+              Center(
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                  ),
+                  onPressed: () {
+                    studentProvider.logout();
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      LoginScreen.routeName,
+                      (route) => false,
+                    );
+                  },
+                  icon: const Icon(Icons.logout, color: Colors.white),
+                  label: const Text(
+                    "Logout",
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
-                onPressed: () {},
-                icon: const Icon(Icons.login, color: Colors.white),
-                label: const Text(
-                  "Login",
-                  style: TextStyle(color: Colors.white),
-                ),
               ),
-            ),
             const SizedBox(height: 10),
             Center(
               child: ElevatedButton.icon(

@@ -10,7 +10,7 @@ class MyValidators {
   }
 
   static String? emailValidator(String? value) {
-    if (value!.isEmpty) {
+    if (value == null || value.isEmpty) {
       return 'Please enter an email';
     }
     if (!RegExp(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b')

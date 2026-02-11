@@ -8,6 +8,7 @@ import 'package:e_menza/widgets/subtitle_text.dart';
 import 'package:e_menza/widgets/title_text.dart';
 import 'package:provider/provider.dart';
 import 'package:e_menza/providers/student_providers.dart';
+import 'package:e_menza/screens/auth/forgot_pin_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   static const String routeName = "/LoginScreen";
@@ -56,7 +57,8 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final studentProvider = Provider.of<StudentProvider>(context, listen: false);
+      final studentProvider =
+          Provider.of<StudentProvider>(context, listen: false);
       final success = await studentProvider.login(
         _cardNumberController.text.trim(),
         _pinController.text.trim(),
@@ -115,14 +117,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 16),
                 const Align(
                   alignment: Alignment.centerLeft,
-                  child: TitelesTextWidget(label: "Welcome back!"),
+                  child: TitlesTextWidget(label: "Welcome back!"),
                 ),
                 const SizedBox(height: 16),
                 Form(
                   key: _formkey,
                   child: Column(
                     children: [
-                      // Broj kartice
                       TextFormField(
                         controller: _cardNumberController,
                         focusNode: _cardNumberFocusNode,
@@ -133,8 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           prefixIcon: Icon(Icons.credit_card),
                         ),
                         onFieldSubmitted: (_) {
-                          FocusScope.of(context)
-                              .requestFocus(_pinFocusNode);
+                          FocusScope.of(context).requestFocus(_pinFocusNode);
                         },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -147,8 +147,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                       ),
                       const SizedBox(height: 16.0),
-
-                      // PIN
                       TextFormField(
                         obscureText: obscureText,
                         controller: _pinController,
@@ -183,13 +181,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                       ),
                       const SizedBox(height: 16.0),
-
-                      // Forgot PIN
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: () {
-                            
+                            Navigator.of(context)
+                                .pushNamed(ForgotPinScreen.routeName);
                           },
                           child: const SubtitleTextWidget(
                             label: "Zaboravio PIN?",
@@ -199,8 +196,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 24.0),
-
-                    
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
@@ -216,9 +211,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 16.0),
-
-
-                    
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

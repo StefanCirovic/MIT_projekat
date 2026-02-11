@@ -1,3 +1,4 @@
+import 'package:e_menza/screens/auth/login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,6 +8,8 @@ import 'package:e_menza/services/my_app_functions.dart';
 import 'package:e_menza/widgets/subtitle_text.dart';
 import 'package:e_menza/widgets/title_text.dart';
 import 'package:e_menza/screens/root_screen.dart';
+import 'package:e_menza/providers/student_providers.dart';
+import 'package:provider/provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   static const routName = "/RegisterScreen";
@@ -17,42 +20,42 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   bool obscureText = true;
-  late final TextEditingController _nameController,
+  bool _isLoading = false;
+  late final TextEditingController _cardNumberController,
       _emailController,
-      _passwordController,
-      _repeatPasswordController;
-  late final FocusNode _nameFocusNode,
+      _pinController,
+      _pinConfirmController;
+  late final FocusNode _cardNumberFocusNode,
       _emailFocusNode,
-      _passwordFocusNode,
-      _repeatPasswordFocusNode;
+      _pinFocusNode,
+      _pinConfirmFocusNode;
   final _formkey = GlobalKey<FormState>();
-  XFile? _pickedImage;
   @override
   void initState() {
-    _nameController = TextEditingController();
+    _cardNumberController = TextEditingController();
     _emailController = TextEditingController();
-    _passwordController = TextEditingController();
-    _repeatPasswordController = TextEditingController();
-// Focus Nodes
-    _nameFocusNode = FocusNode();
+    _pinController = TextEditingController();
+    _pinConfirmController = TextEditingController();
+
+    _cardNumberFocusNode = FocusNode();
     _emailFocusNode = FocusNode();
-    _passwordFocusNode = FocusNode();
-    _repeatPasswordFocusNode = FocusNode();
+    _pinFocusNode = FocusNode();
+    _pinConfirmFocusNode = FocusNode();
     super.initState();
   }
 
   @override
   void dispose() {
     if (mounted) {
-      _nameController.dispose();
+      _cardNumberController.dispose();
       _emailController.dispose();
-      _passwordController.dispose();
-      _repeatPasswordController.dispose();
-// Focus Nodes
-      _nameFocusNode.dispose();
+      _pinController.dispose();
+      _pinConfirmController.dispose();
+      // Focus Nodes
+      _cardNumberFocusNode.dispose();
       _emailFocusNode.dispose();
-      _passwordFocusNode.dispose();
-      _repeatPasswordFocusNode.dispose();
+      _pinFocusNode.dispose();
+      _pinConfirmFocusNode.dispose();
     }
     super.dispose();
   }
@@ -61,7 +64,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final isValid = _formkey.currentState!.validate();
     FocusScope.of(context).unfocus();
     if (!isValid) return;
-    Navigator.of(context).pushReplacementNamed(RootScreen.routeName);
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final studentProvider =
+          Provider.of<StudentProvider>(context, listen: false);
+      final result = await studentProvider.register(
+        _cardNumberController.text.trim(),
+        _pinController.text.trim(),
+        _emailController.text.trim(),
+      );
+
+      if (result == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Uspešno ste registrovali PIN!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Greška: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -107,7 +151,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TitelesTextWidget(label: "Welcome back!"),
+                        TitlesTextWidget(label: "Welcome back!"),
                         SubtitleTextWidget(label: "Your welcome message"),
                       ],
                     )),
@@ -123,22 +167,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      // Broj kartice
                       TextFormField(
-                        controller: _nameController,
-                        focusNode: _nameFocusNode,
+                        controller: _cardNumberController,
+                        focusNode: _cardNumberFocusNode,
                         textInputAction: TextInputAction.next,
-                        keyboardType: TextInputType.name,
+                        keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
-                          hintText: 'Full Name',
+                          hintText: 'Broj kartice',
                           prefixIcon: Icon(
-                            Icons.person,
+                            Icons.credit_card,
                           ),
                         ),
                         onFieldSubmitted: (value) {
                           FocusScope.of(context).requestFocus(_emailFocusNode);
                         },
                         validator: (value) {
-                          return MyValidators.displayNamevalidator(value);
+                          if (value == null || value.isEmpty) {
+                            return 'Unesite broj kartice';
+                          }
+                          if (value.length < 7) {
+                            return 'Broj kartice mora imati najmanje 7 cifara';
+                          }
+                          return null;
                         },
                       ),
                       const SizedBox(
@@ -156,8 +207,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         onFieldSubmitted: (value) {
-                          FocusScope.of(context)
-                              .requestFocus(_passwordFocusNode);
+                          FocusScope.of(context).requestFocus(_pinFocusNode);
                         },
                         validator: (value) {
                           return MyValidators.emailValidator(value);
@@ -166,17 +216,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(
                         height: 16.0,
                       ),
+                      // PIN
                       TextFormField(
-                        controller: _passwordController,
-                        focusNode: _passwordFocusNode,
+                        controller: _pinController,
+                        focusNode: _pinFocusNode,
                         textInputAction: TextInputAction.next,
-                        keyboardType: TextInputType.visiblePassword,
+                        keyboardType: TextInputType.number,
                         obscureText: obscureText,
                         decoration: InputDecoration(
-                          hintText: "***********",
-                          prefixIcon: const Icon(
-                            IconlyLight.lock,
-                          ),
+                          hintText: "PIN",
+                          prefixIcon: const Icon(Icons.lock),
                           suffixIcon: IconButton(
                             onPressed: () {
                               setState(() {
@@ -190,28 +239,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ),
                         ),
-                        onFieldSubmitted: (value) async {
+                        onFieldSubmitted: (value) {
                           FocusScope.of(context)
-                              .requestFocus(_repeatPasswordFocusNode);
+                              .requestFocus(_pinConfirmFocusNode);
                         },
                         validator: (value) {
-                          return MyValidators.passwordValidator(value);
+                          if (value == null || value.isEmpty) {
+                            return 'Unesite PIN';
+                          }
+                          if (value.length < 4) {
+                            return 'PIN mora imati najmanje 4 cifre';
+                          }
+                          return null;
                         },
                       ),
                       const SizedBox(
                         height: 16.0,
                       ),
+                      // Potvrda PIN-a
                       TextFormField(
-                        controller: _repeatPasswordController,
-                        focusNode: _repeatPasswordFocusNode,
+                        controller: _pinConfirmController,
+                        focusNode: _pinConfirmFocusNode,
                         textInputAction: TextInputAction.done,
-                        keyboardType: TextInputType.visiblePassword,
+                        keyboardType: TextInputType.number,
                         obscureText: obscureText,
                         decoration: InputDecoration(
-                          hintText: "Repeat password",
-                          prefixIcon: const Icon(
-                            IconlyLight.lock,
-                          ),
+                          hintText: "Potvrdi PIN",
+                          prefixIcon: const Icon(Icons.lock),
                           suffixIcon: IconButton(
                             onPressed: () {
                               setState(() {
@@ -229,10 +283,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           await _registerFCT();
                         },
                         validator: (value) {
-                          return MyValidators.repeatPasswordValidator(
-                            value: value,
-                            password: _passwordController.text,
-                          );
+                          if (value == null || value.isEmpty) {
+                            return 'Potvrdite PIN';
+                          }
+                          if (value != _pinController.text) {
+                            return 'PIN-ovi se ne poklapaju';
+                          }
+                          return null;
                         },
                       ),
                       const SizedBox(
@@ -243,18 +300,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.all(12.0),
-// backgroundColor: Colors.red,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(
                                 12.0,
                               ),
                             ),
                           ),
-                          icon: const Icon(IconlyLight.addUser),
-                          label: const Text("Sign up"),
-                          onPressed: () async {
-                            await _registerFCT();
-                          },
+                          icon: _isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(IconlyLight.addUser),
+                          label: Text(
+                              _isLoading ? "Registracija..." : "Registruj PIN"),
+                          onPressed: _isLoading
+                              ? null
+                              : () async {
+                                  await _registerFCT();
+                                },
                         ),
                       ),
                     ],

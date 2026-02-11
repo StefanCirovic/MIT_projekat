@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class TitelesTextWidget extends StatelessWidget {
-  const TitelesTextWidget({
+class TitlesTextWidget extends StatelessWidget {
+  const TitlesTextWidget({
     super.key,
     required this.label,
     this.fontSize = 20,
