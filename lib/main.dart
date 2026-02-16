@@ -6,6 +6,7 @@ import 'package:e_menza/screens/root_screen.dart';
 import 'package:e_menza/screens/auth/login.dart';
 import 'package:e_menza/screens/auth/register.dart';
 import 'package:e_menza/screens/auth/forgot_pin_screen.dart';
+import 'package:e_menza/screens/admin/admin_dashboard_screen.dart';
 import 'package:e_menza/providers/student_providers.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
               RegisterScreen.routName: (context) => const RegisterScreen(),
               LoginScreen.routeName: (context) => const LoginScreen(),
               ForgotPinScreen.routeName: (context) => const ForgotPinScreen(),
+              AdminDashboardScreen.routeName: (context) => const AdminDashboardScreen(),
             });
       }),
     );

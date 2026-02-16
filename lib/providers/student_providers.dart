@@ -14,7 +14,9 @@ class StudentProvider with ChangeNotifier {
   String? get firstName => _currentStudent?['firstName'];
   String? get lastName => _currentStudent?['lastName'];
   String? get email => _currentStudent?['email'];
+  String? get role => _currentStudent?['role'];
   bool get isLoggedIn => _currentStudent != null;
+  bool get isAdmin => role == 'admin';
 
   void setStatus(StudentStatus newStatus) {
     _status = newStatus;
@@ -70,7 +72,6 @@ class StudentProvider with ChangeNotifier {
     }
   }
 
-  
   Future<String> register(String cardNumber, String pin, String email) async {
     try {
       final doc = await FirebaseFirestore.instance
@@ -83,7 +84,7 @@ class StudentProvider with ChangeNotifier {
       }
 
       final pinHash = _hashPin(pin);
-      
+
       await doc.reference.update({
         'pinHash': pinHash,
         'email': email,
@@ -96,7 +97,6 @@ class StudentProvider with ChangeNotifier {
     }
   }
 
-  
   Future<String> forgotPin(String email) async {
     try {
       final snapshot = await FirebaseFirestore.instance
@@ -109,7 +109,6 @@ class StudentProvider with ChangeNotifier {
         return 'Email nije pronađen';
       }
 
-      
       return 'Poslat je email sa PIN-om';
     } catch (e) {
       print('Forgot PIN error: $e');
