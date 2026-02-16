@@ -1,8 +1,12 @@
+import 'package:e_menza/screens/admin/student_management_screen.dart';
+import 'package:e_menza/screens/admin/meal_management_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:e_menza/providers/student_providers.dart';
+import 'package:e_menza/providers/theme_provider.dart';
 import 'package:e_menza/widgets/title_text.dart';
 import 'package:e_menza/widgets/subtitle_text.dart';
+import 'package:e_menza/services/assets_manager.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   static const String routeName = "/AdminDashboardScreen";
@@ -11,12 +15,9 @@ class AdminDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final studentProvider = Provider.of<StudentProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Admin Panel'),
-        backgroundColor: Colors.red,
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -45,22 +46,10 @@ class AdminDashboardScreen extends StatelessWidget {
                     Icons.people,
                     Colors.blue,
                     () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content:
-                                Text("Student management - u implementaciji")),
-                      );
-                    },
-                  ),
-                  _buildAdminCard(
-                    context,
-                    "Statistike",
-                    Icons.analytics,
-                    Colors.green,
-                    () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text("Statistike - u implementaciji")),
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const StudentManagementScreen(),
+                        ),
                       );
                     },
                   ),
@@ -70,25 +59,59 @@ class AdminDashboardScreen extends StatelessWidget {
                     Icons.restaurant,
                     Colors.orange,
                     () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content:
-                                Text("Menza management - u implementaciji")),
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const MealManagementScreen(),
+                        ),
                       );
                     },
                   ),
-                  _buildAdminCard(
-                    context,
-                    "Podešavanja",
-                    Icons.settings,
-                    Colors.purple,
-                    () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text("Podešavanja - u implementaciji")),
-                      );
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Theme i logout
+            Card(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14)),
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    secondary: Image.asset(
+                        "${AssetsManager.imagePath}/profile/night-mode.png",
+                        height: 34),
+                    title: Text(themeProvider.getIsDarkTheme
+                        ? "Dark Theme"
+                        : "Light Theme"),
+                    value: themeProvider.getIsDarkTheme,
+                    onChanged: (value) {
+                      themeProvider.setDarkTheme(themeValue: value);
                     },
                   ),
+                  const Divider(),
+                  if (studentProvider.isLoggedIn)
+                    Center(
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                        ),
+                        onPressed: () {
+                          studentProvider.logout();
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                            '/LoginScreen',
+                            (route) => false,
+                          );
+                        },
+                        icon: const Icon(Icons.logout, color: Colors.white),
+                        label: const Text(
+                          "Logout",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

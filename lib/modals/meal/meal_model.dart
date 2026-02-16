@@ -9,6 +9,7 @@ class MealModel {
   final String image;
   final int calories;
   final bool isAvailable;
+  final String description;
 
   MealModel({
     required this.id,
@@ -19,5 +20,6 @@ class MealModel {
     required this.image,
     required this.calories,
     required this.isAvailable,
+    this.description = '',
   });
 }

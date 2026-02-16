@@ -20,6 +20,7 @@ class AppConstants {
       price: 0.0,
       calories: 0,
       isAvailable: true,
+      description: "Doručak u menzi",
     ),
     MealModel(
       id: "lunch",
@@ -30,6 +31,7 @@ class AppConstants {
       price: 0.0,
       calories: 0,
       isAvailable: true,
+      description: "Ručak u menzi",
     ),
     MealModel(
       id: "dinner",
@@ -40,6 +42,7 @@ class AppConstants {
       price: 0.0,
       calories: 0,
       isAvailable: true,
+      description: "Večera u menzi",
     ),
   ];
 }

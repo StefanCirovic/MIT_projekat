@@ -23,14 +23,14 @@ class _RootScreenState extends State<RootScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     // Pripremi ekrane na osnovu uloge
-    final studentProvider = Provider.of<StudentProvider>(context, listen: false);
-    
+    final studentProvider =
+        Provider.of<StudentProvider>(context, listen: false);
+
     if (studentProvider.isAdmin) {
       screens = const [
         AdminDashboardScreen(),
-        ProfileScreen(),
       ];
     } else {
       screens = const [
@@ -45,25 +45,23 @@ class _RootScreenState extends State<RootScreen> {
   @override
   Widget build(BuildContext context) {
     final studentProvider = Provider.of<StudentProvider>(context);
-    
+
     return Scaffold(
       body: PageView(
         physics: const NeverScrollableScrollPhysics(),
         controller: controller,
         children: screens,
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: currentScreen,
-        onDestinationSelected: (index) {
-          setState(() {
-            currentScreen = index;
-          });
-          controller.jumpToPage(currentScreen);
-        },
-        destinations: studentProvider.isAdmin 
-          ? _adminDestinations()
-          : _userDestinations(),
-      ),
+      bottomNavigationBar: studentProvider.isAdmin
+          ? null
+          : NavigationBar(
+              selectedIndex: currentScreen,
+              onDestinationSelected: (index) {
+                setState(() => currentScreen = index);
+                controller.jumpToPage(currentScreen);
+              },
+              destinations: _userDestinations(),
+            ),
     );
   }
 
@@ -73,11 +71,6 @@ class _RootScreenState extends State<RootScreen> {
         selectedIcon: Icon(Icons.dashboard),
         icon: Icon(Icons.dashboard_outlined),
         label: "Admin Panel",
-      ),
-      NavigationDestination(
-        selectedIcon: Icon(IconlyBold.profile),
-        icon: Icon(IconlyLight.profile),
-        label: "Profile",
       ),
     ];
   }

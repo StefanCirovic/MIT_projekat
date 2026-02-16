@@ -4,6 +4,7 @@ import 'package:e_menza/modals/meal/meal_enum.dart';
 import 'package:provider/provider.dart';
 import 'package:e_menza/providers/student_providers.dart';
 import 'package:e_menza/modals/student_status.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MealDetailsScreen extends StatefulWidget {
   final MealModel meal;
@@ -19,13 +20,6 @@ class MealDetailsScreenState extends State<MealDetailsScreen> {
   MealModel? selectedDessert;
   MealModel? selectedSalad;
   MealModel? selectedDrink;
-
-  late final List<MealModel> _todayOffer;
-  void initState() {
-    super.initState();
-
-    _todayOffer = _buildMockOfferFor(widget.meal.mealTime);
-  }
 
   double _basePrice(String? mealTime) {
     switch (mealTime) {
@@ -46,142 +40,321 @@ class MealDetailsScreenState extends State<MealDetailsScreen> {
     return p * status.priceMultiplier;
   }
 
-  List<MealModel> _buildMockOfferFor(String? mealTime) {
-    if (mealTime == "breakfast") {
-      return [
-        MealModel(
-          id: "${mealTime}_main_1",
-          name: "Omlet sa sirom",
-          image: "",
-          type: MealType.main,
-          mealTime: mealTime,
-          price: _mealPrice(mealTime),
-          calories: 420,
-          isAvailable: true,
-        ),
-        MealModel(
-          id: "${mealTime}_main_2",
-          name: "Kifla sa šunkom",
-          image: "",
-          type: MealType.main,
-          mealTime: mealTime,
-          price: _mealPrice(mealTime),
-          calories: 390,
-          isAvailable: true,
-        ),
-        MealModel(
-          id: "${mealTime}_drink_1",
-          name: "Jogurt",
-          image: "",
-          type: MealType.drink,
-          mealTime: mealTime,
-          price: 0,
-          calories: 120,
-          isAvailable: true,
-        ),
-        MealModel(
-          id: "${mealTime}_drink_2",
-          name: "Sok",
-          image: "",
-          type: MealType.drink,
-          mealTime: mealTime,
-          price: 0,
-          calories: 150,
-          isAvailable: true,
-        ),
-      ];
-    }
-    return [
-      MealModel(
-        id: "${mealTime} main_1",
-        name: "Piletina sa pirinčem",
-        image: "",
-        type: MealType.main,
-        mealTime: mealTime,
-        price: _mealPrice(mealTime),
-        calories: 650,
-        isAvailable: true,
-      ),
-      MealModel(
-        id: "${mealTime} main_2",
-        name: "Piletina ",
-        image: "",
-        type: MealType.main,
-        mealTime: mealTime,
-        price: _mealPrice(mealTime),
-        calories: 650,
-        isAvailable: true,
-      ),
-      MealModel(
-        id: "${mealTime}_dessert_1",
-        name: "Palačinke",
-        image: "",
-        type: MealType.dessert,
-        mealTime: mealTime,
-        price: 0,
-        calories: 330,
-        isAvailable: true,
-      ),
-      MealModel(
-        id: "${mealTime}_dessert_2",
-        name: "Kolač",
-        image: "",
-        type: MealType.dessert,
-        mealTime: mealTime,
-        price: 0,
-        calories: 290,
-        isAvailable: true,
-      ),
-      MealModel(
-        id: "${mealTime}_salad_1",
-        name: "Kupus salata",
-        image: "",
-        type: MealType.salad,
-        mealTime: mealTime,
-        price: 0,
-        calories: 80,
-        isAvailable: true,
-      ),
-      MealModel(
-        id: "${mealTime}_salad_2",
-        name: "Šopska salata",
-        image: "",
-        type: MealType.salad,
-        mealTime: mealTime,
-        price: 0,
-        calories: 140,
-        isAvailable: true,
-      ),
-      MealModel(
-        id: "${mealTime}_drink_1",
-        name: "Jogurt",
-        image: "",
-        type: MealType.drink,
-        mealTime: mealTime,
-        price: 0,
-        calories: 120,
-        isAvailable: true,
-      ),
-      MealModel(
-        id: "${mealTime}_drink_2",
-        name: "Sok",
-        image: "",
-        type: MealType.drink,
-        mealTime: mealTime,
-        price: 0,
-        calories: 150,
-        isAvailable: true,
-      ),
-    ];
+  // Konvertuj Firestore dokument u MealModel
+  MealModel _docToMealModel(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return MealModel(
+      id: doc.id,
+      name: data['name'] ?? '',
+      image: data['image'] ?? '',
+      type: _stringToMealType(data['type']),
+      mealTime: data['mealTime'] ?? '',
+      price: (data['price'] ?? 0).toDouble(),
+      calories: data['calories'] ?? 0,
+      isAvailable: data['isAvailable'] ?? true,
+    );
   }
 
-  List<MealModel> _byType(MealType t) =>
-      _todayOffer.where((m) => m.type == t).toList();
+  MealType _stringToMealType(String? type) {
+    switch (type) {
+      case 'main':
+        return MealType.main;
+      case 'drink':
+        return MealType.drink;
+      case 'dessert':
+        return MealType.dessert;
+      case 'salad':
+        return MealType.salad;
+      default:
+        return MealType.main;
+    }
+  }
 
-  double get _totalPrice {
-    final mainCost =
-        selectedMain != null ? _mealPrice(selectedMain!.mealTime) : 0.0;
-    return mainCost;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Detalji: ${widget.meal.name}")),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('meals')
+            .where('mealTime', isEqualTo: widget.meal.mealTime)
+            .where('isAvailable', isEqualTo: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Greška: ${snapshot.error}'));
+          }
+
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(
+              child: Text('Nema dostupnih obroka za ovo vreme'),
+            );
+          }
+
+          final meals =
+              snapshot.data!.docs.map((doc) => _docToMealModel(doc)).toList();
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.meal.name,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color:
+                                  Theme.of(context).textTheme.titleLarge?.color,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          "Ponuda dana",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Glavno jelo
+                if (_getMealsByType(meals, MealType.main).isNotEmpty) ...[
+                  _buildMealSection(
+                    "Glavno jelo",
+                    _getMealsByType(meals, MealType.main),
+                    (meal) => selectedMain = meal,
+                    selectedMain,
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Salate (samo za ručak i večeru)
+                if (widget.meal.mealTime != 'breakfast' &&
+                    _getMealsByType(meals, MealType.salad).isNotEmpty) ...[
+                  _buildMealSection(
+                    "Salate",
+                    _getMealsByType(meals, MealType.salad),
+                    (meal) => selectedSalad = meal,
+                    selectedSalad,
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Dezerti (samo za ručak i večeru)
+                if (widget.meal.mealTime != 'breakfast' &&
+                    _getMealsByType(meals, MealType.dessert).isNotEmpty) ...[
+                  _buildMealSection(
+                    "Dezerti",
+                    _getMealsByType(meals, MealType.dessert),
+                    (meal) => selectedDessert = meal,
+                    selectedDessert,
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Pića
+                if (_getMealsByType(meals, MealType.drink).isNotEmpty) ...[
+                  _buildMealSection(
+                    "Pića",
+                    _getMealsByType(meals, MealType.drink),
+                    (meal) => selectedDrink = meal,
+                    selectedDrink,
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Ukupno i dugme za rezervaciju
+                _buildSummarySection(),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  List<MealModel> _getMealsByType(List<MealModel> meals, MealType type) {
+    return meals.where((meal) => meal.type == type).toList();
+  }
+
+  Widget _buildMealSection(
+    String title,
+    List<MealModel> meals,
+    Function(MealModel) onSelect,
+    MealModel? selected,
+  ) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            ...meals.map((meal) => _buildMealItem(meal, onSelect, selected)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMealItem(
+    MealModel meal,
+    Function(MealModel) onSelect,
+    MealModel? selected,
+  ) {
+    final isSelected = selected?.id == meal.id;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          onSelect(meal);
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: isSelected
+                ? Theme.of(context).primaryColor
+                : Colors.grey.shade300,
+          ),
+          borderRadius: BorderRadius.circular(8),
+          color: isSelected
+              ? Theme.of(context).primaryColor.withOpacity(0.1)
+              : null,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    meal.name,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: isSelected ? Theme.of(context).primaryColor : null,
+                    ),
+                  ),
+                  Text(
+                    '${meal.calories} kcal',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              '${meal.price.toStringAsFixed(0)} RSD',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummarySection() {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text("Ukupno:",
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(
+                  "${_calculateTotalPrice().toStringAsFixed(0)} RSD",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text("Ukupno kalorija:", style: TextStyle(fontSize: 14)),
+                Text(
+                  "$_totalCalories kcal",
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _canReserve ? _reserve : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: const Text(
+                  "Rezerviši",
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  double _calculateTotalPrice() {
+    double total = 0;
+
+    if (selectedMain != null) {
+      total += _mealPrice(selectedMain!.mealTime);
+    }
+
+    if (selectedDessert != null) {
+      total += selectedDessert!.price;
+    }
+
+    if (selectedSalad != null) {
+      total += selectedSalad!.price;
+    }
+
+    if (selectedDrink != null) {
+      total += selectedDrink!.price;
+    }
+
+    return total;
   }
 
   int get _totalCalories {
@@ -232,7 +405,7 @@ class MealDetailsScreenState extends State<MealDetailsScreen> {
         content: Text(
           "Rezervisao si:\n" +
               lines.join("\n") +
-              "\n\nUkupno: ${_totalPrice.toStringAsFixed(0)} RSD • $_totalCalories kcal",
+              "\n\nUkupno: ${_calculateTotalPrice().toStringAsFixed(0)} RSD • $_totalCalories kcal",
         ),
         actions: [
           TextButton(
@@ -241,189 +414,6 @@ class MealDetailsScreenState extends State<MealDetailsScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Detalji: ${widget.meal.name}")),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14)),
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        widget.meal.name,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).textTheme.titleLarge?.color,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      "Ponuda dana",
-                      style: TextStyle(
-                          color: Theme.of(context).textTheme.bodySmall?.color),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
-            if (_requiredTypesFor(widget.meal.mealTime)
-                .contains(MealType.main)) ...[
-              sectionTitle("Glavno jelo "),
-              choiceList(
-                items: _byType(MealType.main),
-                selected: selectedMain,
-                onPick: (m) => setState(() => selectedMain = m),
-              ),
-              const SizedBox(height: 14),
-            ],
-            if (_requiredTypesFor(widget.meal.mealTime)
-                .contains(MealType.dessert)) ...[
-              sectionTitle("Dezert "),
-              choiceList(
-                items: _byType(MealType.dessert),
-                selected: selectedDessert,
-                onPick: (m) => setState(() => selectedDessert = m),
-              ),
-              const SizedBox(height: 14),
-            ],
-            if (_requiredTypesFor(widget.meal.mealTime)
-                .contains(MealType.salad)) ...[
-              sectionTitle("Salata "),
-              choiceList(
-                items: _byType(MealType.salad),
-                selected: selectedSalad,
-                onPick: (m) => setState(() => selectedSalad = m),
-              ),
-              const SizedBox(height: 14),
-            ],
-            if (_requiredTypesFor(widget.meal.mealTime)
-                .contains(MealType.drink)) ...[
-              sectionTitle("Piće"),
-              choiceList(
-                items: _byType(MealType.drink),
-                selected: selectedDrink,
-                onPick: (m) => setState(() => selectedDrink = m),
-              ),
-            ],
-            const SizedBox(height: 16),
-            Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14)),
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  children: [
-                    _row("Ukupno cena:",
-                        "${_totalPrice.toStringAsFixed(0)} RSD"),
-                    const SizedBox(height: 8),
-                    _row("Ukupno kalorije:", "$_totalCalories kcal"),
-                    const SizedBox(height: 10),
-                    Text(
-                      _canReserve
-                          ? "Spremno za rezervaciju"
-                          : "Izaberi po 1 stavku iz svake kategorije",
-                      style: TextStyle(
-                          color: Theme.of(context).textTheme.bodySmall?.color),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.event_available),
-                label: const Text("Rezerviši obrok"),
-                onPressed: _canReserve ? _reserve : null,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.all(16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget sectionTitle(String text) => Text(
-        text,
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: Theme.of(context).textTheme.titleMedium?.color,
-        ),
-      );
-
-  Widget choiceList({
-    required List<MealModel> items,
-    required MealModel? selected,
-    required void Function(MealModel m) onPick,
-  }) {
-    return Column(
-      children: items.map((m) {
-        final isSelected = selected?.id == m.id;
-        return Card(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: ListTile(
-            leading: null,
-            title: Text(
-              m.name,
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: Theme.of(context).textTheme.bodyMedium?.color,
-              ),
-            ),
-            subtitle: Text(
-              m.type == MealType.main
-                  ? "${_mealPrice(m.mealTime).toStringAsFixed(0)} RSD • ${m.calories} kcal"
-                  : "${m.calories} kcal",
-              style: TextStyle(
-                  color: Theme.of(context).textTheme.bodySmall?.color),
-            ),
-            trailing: isSelected
-                ? const Icon(Icons.check_circle)
-                : const Icon(Icons.circle_outlined),
-            onTap: () => onPick(m),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _row(String left, String right) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(left,
-            style:
-                TextStyle(color: Theme.of(context).textTheme.bodySmall?.color)),
-        Text(
-          right,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).textTheme.bodyMedium?.color,
-          ),
-        ),
-      ],
     );
   }
 }
