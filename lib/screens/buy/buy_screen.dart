@@ -2,6 +2,8 @@ import 'package:e_menza/providers/student_providers.dart';
 import 'package:flutter/material.dart';
 import 'purchase_meals_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:e_menza/modals/meal/meal_enum.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BuyScreen extends StatefulWidget {
   static const routeName = "/BuyScreen";
@@ -12,7 +14,6 @@ class BuyScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<BuyScreen> {
-  double _balance = 5050.0;
   final Map<MealTime, int> _monthlyLimit = {
     MealTime.breakfast: 30,
     MealTime.lunch: 30,
@@ -25,11 +26,20 @@ class _AccountScreenState extends State<BuyScreen> {
     MealTime.dinner: 0,
   };
 
-  final Map<MealTime, int> _onCard = {
-    MealTime.breakfast: 5,
-    MealTime.lunch: 10,
-    MealTime.dinner: 3,
-  };
+  double get _balance =>
+      context.read<StudentProvider>().balance?.toDouble() ?? 0.0;
+
+  int getOnCard(MealTime mealTime) {
+    final student = context.read<StudentProvider>().currentStudent;
+    switch (mealTime) {
+      case MealTime.breakfast:
+        return student?['onCardBreakfast']?.toInt() ?? 0;
+      case MealTime.lunch:
+        return student?['onCardLunch']?.toInt() ?? 0;
+      case MealTime.dinner:
+        return student?['onCardDinner']?.toInt() ?? 0;
+    }
+  }
 
   int remaining(MealTime t) => _monthlyLimit[t]! - _usedThisMonth[t]!;
 
@@ -50,11 +60,22 @@ class _AccountScreenState extends State<BuyScreen> {
     if (result == null) return;
 
     setState(() {
-      _balance -= result.totalCost;
-      _onCard[result.mealTime] = _onCard[result.mealTime]! + result.quantity;
       _usedThisMonth[result.mealTime] =
           _usedThisMonth[result.mealTime]! + result.quantity;
     });
+
+    final studentProvider = context.read<StudentProvider>();
+    final newBalance = (studentProvider.balance ?? 0.0) - result.totalCost;
+
+    await FirebaseFirestore.instance
+        .collection('students')
+        .doc(studentProvider.cardNumber)
+        .update({'balance': newBalance});
+
+    final updatedStudent =
+        Map<String, dynamic>.from(studentProvider.currentStudent ?? {});
+    updatedStudent['balance'] = newBalance;
+    studentProvider.setCurrentStudent(updatedStudent);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -139,7 +160,7 @@ class _AccountScreenState extends State<BuyScreen> {
                 Expanded(
                     child: _miniStat("Dostupno za mesec", "${remaining(t)}")),
                 const SizedBox(width: 10),
-                Expanded(child: _miniStat("Na kartici", "${_onCard[t]}")),
+                Expanded(child: _miniStat("Na kartici", "${getOnCard(t)}")),
                 const SizedBox(width: 10),
                 Expanded(child: _miniStat("Limit", "${_monthlyLimit[t]}")),
               ],

@@ -14,6 +14,9 @@ class StudentProvider with ChangeNotifier {
   String? get firstName => _currentStudent?['firstName'];
   String? get lastName => _currentStudent?['lastName'];
   String? get email => _currentStudent?['email'];
+  String? get index => _currentStudent?['index'];
+  String? get accountNumber => _currentStudent?['accountNumber'];
+  double? get balance => currentStudent?['balance']?.toDouble();
   String? get role => _currentStudent?['role'];
   bool get isLoggedIn => _currentStudent != null;
   bool get isAdmin => role == 'admin';
@@ -25,7 +28,33 @@ class StudentProvider with ChangeNotifier {
 
   void setCurrentStudent(Map<String, dynamic> student) {
     _currentStudent = student;
+
+    final statusString = student['status'] ?? 'budget';
+    if (statusString == 'selfFinancing') {
+      _status = StudentStatus.selfFinancing;
+    } else {
+      _status = StudentStatus.budget;
+    }
+
     notifyListeners();
+  }
+
+  Future<void> updateStatus() async {
+    if (_currentStudent == null) return;
+
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('students')
+          .doc(_currentStudent!['cardNumber'])
+          .get();
+
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
+        setCurrentStudent(data);
+      }
+    } catch (e) {
+      print('Update status error: $e');
+    }
   }
 
   void logout() {

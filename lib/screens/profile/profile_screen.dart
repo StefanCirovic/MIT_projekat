@@ -20,6 +20,14 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<StudentProvider>().updateStatus();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final studentProvider = context.watch<StudentProvider>();
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -120,7 +128,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  "IT23-2023",
+                                  studentProvider.currentStudent?['index'] ??
+                                      'N/A',
                                   style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
@@ -187,7 +196,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  "0129325",
+                                  studentProvider.cardNumber ?? 'N/A',
                                   style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
@@ -219,7 +228,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  "170-00219342-908",
+                                  studentProvider.accountNumber ?? 'N/A',
                                   style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,

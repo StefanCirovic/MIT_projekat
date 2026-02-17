@@ -263,13 +263,14 @@ class MealDetailsScreenState extends State<MealDetailsScreen> {
                 ],
               ),
             ),
-            Text(
-              '${meal.price.toStringAsFixed(0)} RSD',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
+            if (meal.type == MealType.main)
+              Text(
+                '${meal.price.toStringAsFixed(0)} RSD',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -337,19 +338,6 @@ class MealDetailsScreenState extends State<MealDetailsScreen> {
     if (selectedMain != null) {
       total += _mealPrice(selectedMain!.mealTime);
     }
-
-    if (selectedDessert != null) {
-      total += selectedDessert!.price;
-    }
-
-    if (selectedSalad != null) {
-      total += selectedSalad!.price;
-    }
-
-    if (selectedDrink != null) {
-      total += selectedDrink!.price;
-    }
-
     return total;
   }
 
