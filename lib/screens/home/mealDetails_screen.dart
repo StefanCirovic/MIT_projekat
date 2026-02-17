@@ -40,7 +40,6 @@ class MealDetailsScreenState extends State<MealDetailsScreen> {
     return p * status.priceMultiplier;
   }
 
-  // Konvertuj Firestore dokument u MealModel
   MealModel _docToMealModel(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return MealModel(
@@ -146,7 +145,6 @@ class MealDetailsScreenState extends State<MealDetailsScreen> {
                   const SizedBox(height: 16),
                 ],
 
-                // Salate (samo za ručak i večeru)
                 if (widget.meal.mealTime != 'breakfast' &&
                     _getMealsByType(meals, MealType.salad).isNotEmpty) ...[
                   _buildMealSection(
@@ -158,7 +156,6 @@ class MealDetailsScreenState extends State<MealDetailsScreen> {
                   const SizedBox(height: 16),
                 ],
 
-                // Dezerti (samo za ručak i večeru)
                 if (widget.meal.mealTime != 'breakfast' &&
                     _getMealsByType(meals, MealType.dessert).isNotEmpty) ...[
                   _buildMealSection(
@@ -170,7 +167,6 @@ class MealDetailsScreenState extends State<MealDetailsScreen> {
                   const SizedBox(height: 16),
                 ],
 
-                // Pića
                 if (_getMealsByType(meals, MealType.drink).isNotEmpty) ...[
                   _buildMealSection(
                     "Pića",

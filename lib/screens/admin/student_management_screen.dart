@@ -20,6 +20,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _indexController = TextEditingController();
   final TextEditingController _newCardNumberController =
       TextEditingController();
   bool _isLoading = false;
@@ -36,6 +37,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();
+    _indexController.dispose();
     _newCardNumberController.dispose();
     super.dispose();
   }
@@ -233,7 +235,6 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Status toggle
                             Switch(
                               value: isActive,
                               onChanged: (value) {
@@ -241,7 +242,6 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                               },
                             ),
                             const SizedBox(width: 8),
-                            // Edit dugme
                             if (isActive)
                               IconButton(
                                 icon:
@@ -261,7 +261,164 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddStudentDialog,
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
     );
+  }
+
+  void _showAddStudentDialog() {
+    _cardNumberController.clear();
+    _firstNameController.clear();
+    _lastNameController.clear();
+    _emailController.clear();
+    _indexController.clear();
+    _selectedStatus = StudentStatus.budget;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Dodaj Novog Studenta'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _cardNumberController,
+                decoration: const InputDecoration(
+                  labelText: 'Broj kartice',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _firstNameController,
+                decoration: const InputDecoration(
+                  labelText: 'Ime',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _lastNameController,
+                decoration: const InputDecoration(
+                  labelText: 'Prezime',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _indexController,
+                decoration: const InputDecoration(
+                  labelText: 'Index',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<StudentStatus>(
+                value: _selectedStatus,
+                decoration: const InputDecoration(labelText: 'Status studenta'),
+                items: _statusOptions.map((status) {
+                  return DropdownMenuItem<StudentStatus>(
+                    value: status,
+                    child: Text(status == StudentStatus.budget
+                        ? 'Budžet'
+                        : 'Samofinansiranje'),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedStatus = value!;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Otkaži'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await _addNewStudent();
+            },
+            child: const Text('Dodaj'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _addNewStudent() async {
+    if (_cardNumberController.text.isEmpty ||
+        _firstNameController.text.isEmpty ||
+        _lastNameController.text.isEmpty ||
+        _indexController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sva polja su obavezna'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final existingDoc = await FirebaseFirestore.instance
+          .collection('students')
+          .doc(_cardNumberController.text)
+          .get();
+
+      if (existingDoc.exists) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Broj kartice već postoji'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('students')
+          .doc(_cardNumberController.text)
+          .set({
+        'cardNumber': _cardNumberController.text,
+        'firstName': _firstNameController.text,
+        'lastName': _lastNameController.text,
+        'index': _indexController.text,
+        'email': '', // prazan email
+        'status': _selectedStatus.name,
+        'isActive': true,
+        'role': 'student',
+        'balance': 0.0,
+        'mealsRemaining': 0,
+        'pinHash': '',
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Student uspešno dodat'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Greška: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   void _showEditDialog(Map<String, dynamic> student) {

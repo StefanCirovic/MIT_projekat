@@ -21,7 +21,7 @@ class _MealManagementScreenState extends State<MealManagementScreen> {
   bool _isLoading = false;
 
   final List<String> _mealTimes = ['breakfast', 'lunch', 'dinner'];
-  final List<String> _mealTypes = ['main', 'side', 'drink', 'dessert', 'salad'];
+  final List<String> _mealTypes = ['main', 'drink', 'dessert', 'salad'];
 
   @override
   void dispose() {
@@ -85,7 +85,8 @@ class _MealManagementScreenState extends State<MealManagementScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(!currentStatus ? 'Obrok aktiviran' : 'Obrok deaktiviran'),
+          content:
+              Text(!currentStatus ? 'Obrok aktiviran' : 'Obrok deaktiviran'),
           backgroundColor: !currentStatus ? Colors.green : Colors.orange,
         ),
       );
@@ -295,7 +296,8 @@ class _MealManagementScreenState extends State<MealManagementScreen> {
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       value: _selectedMealTime,
-                      decoration: const InputDecoration(labelText: 'Vreme obroka'),
+                      decoration:
+                          const InputDecoration(labelText: 'Vreme obroka'),
                       items: _mealTimes.map((time) {
                         return DropdownMenuItem(
                           value: time,
@@ -311,7 +313,8 @@ class _MealManagementScreenState extends State<MealManagementScreen> {
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       value: _selectedMealType,
-                      decoration: const InputDecoration(labelText: 'Tip obroka'),
+                      decoration:
+                          const InputDecoration(labelText: 'Tip obroka'),
                       items: _mealTypes.map((type) {
                         return DropdownMenuItem(
                           value: type,
@@ -333,7 +336,8 @@ class _MealManagementScreenState extends State<MealManagementScreen> {
                           backgroundColor: Colors.orange,
                         ),
                         child: _isLoading
-                            ? const CircularProgressIndicator(color: Colors.white)
+                            ? const CircularProgressIndicator(
+                                color: Colors.white)
                             : const Text('Dodaj obrok'),
                       ),
                     ),
@@ -342,11 +346,12 @@ class _MealManagementScreenState extends State<MealManagementScreen> {
               ),
             ),
           ),
-          
+
           // Lista obroka
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('meals').snapshots(),
+              stream:
+                  FirebaseFirestore.instance.collection('meals').snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -377,10 +382,12 @@ class _MealManagementScreenState extends State<MealManagementScreen> {
                     final isAvailable = meal['isAvailable'] ?? true;
 
                     return Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: isAvailable ? Colors.green : Colors.grey,
+                          backgroundColor:
+                              isAvailable ? Colors.green : Colors.grey,
                           child: Text(
                             name.isNotEmpty ? name[0].toUpperCase() : 'M',
                             style: const TextStyle(
@@ -390,7 +397,8 @@ class _MealManagementScreenState extends State<MealManagementScreen> {
                           ),
                         ),
                         title: Text(name),
-                        subtitle: Text('$price RSD • $calories kal • $mealTime • $type'),
+                        subtitle: Text(
+                            '$price RSD • $calories kal • $mealTime • $type'),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -435,7 +443,8 @@ class _MealManagementScreenState extends State<MealManagementScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Obriši obrok'),
-        content: Text('Da li ste sigurni da želite da obrišete obrok "$mealName"?'),
+        content:
+            Text('Da li ste sigurni da želite da obrišete obrok "$mealName"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),

@@ -18,27 +18,34 @@ class AdminDashboardScreen extends StatelessWidget {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const TitlesTextWidget(label: "Dobrodošli Admin!"),
+            const SizedBox(height: 16),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: TitlesTextWidget(label: "Dobrodošli Admin!"),
+            ),
             const SizedBox(height: 8),
-            SubtitleTextWidget(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SubtitleTextWidget(
                 label:
-                    "${studentProvider.firstName} ${studentProvider.lastName}"),
+                    "${studentProvider.firstName} ${studentProvider.lastName}",
+              ),
+            ),
             const SizedBox(height: 32),
 
-            // Admin funkcionalnosti
-            const TitlesTextWidget(label: "Admin Funkcije"),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: TitlesTextWidget(label: "Admin Funkcije"),
+            ),
             const SizedBox(height: 16),
 
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
                 children: [
                   _buildAdminCard(
                     context,
@@ -53,6 +60,7 @@ class AdminDashboardScreen extends StatelessWidget {
                       );
                     },
                   ),
+                  const SizedBox(height: 20),
                   _buildAdminCard(
                     context,
                     "Upravljanje Menzom",
@@ -69,7 +77,9 @@ class AdminDashboardScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+
+            const Spacer(),
+
             // Theme i logout
             Card(
               shape: RoundedRectangleBorder(
@@ -123,28 +133,34 @@ class AdminDashboardScreen extends StatelessWidget {
 
   Widget _buildAdminCard(BuildContext context, String title, IconData icon,
       Color color, VoidCallback onTap) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 48, color: color),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+    return SizedBox(
+      width: double.infinity,
+      height: 180,
+      child: Card(
+        elevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 48, color: color),
+                const SizedBox(height: 8),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
