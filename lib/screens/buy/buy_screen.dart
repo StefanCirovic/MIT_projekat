@@ -41,7 +41,16 @@ class _AccountScreenState extends State<BuyScreen> {
     }
   }
 
-  int remaining(MealTime t) => _monthlyLimit[t]! - _usedThisMonth[t]!;
+  int remaining(MealTime t) {
+    final student = context.read<StudentProvider>().currentStudent;
+
+    final fieldMap = {
+      MealTime.breakfast: 'remainingBreakfast',
+      MealTime.lunch: 'remainingLunch',
+      MealTime.dinner: 'remainingDinner',
+    };
+    return (student?[fieldMap[t]] as num?)?.toInt() ?? 0;
+  }
 
   Future<void> _openPurchase(MealTime selectedMeal) async {
     final studentStatus = context.read<StudentProvider>().status;
@@ -72,9 +81,68 @@ class _AccountScreenState extends State<BuyScreen> {
         .doc(studentProvider.cardNumber)
         .update({'balance': newBalance});
 
+    final currentOnCard = getOnCard(result.mealTime);
+    final newOnCard = currentOnCard + result.quantity;
+
+    String onCardField;
+    switch (result.mealTime) {
+      case MealTime.breakfast:
+        onCardField = 'onCardBreakfast';
+        break;
+      case MealTime.lunch:
+        onCardField = 'onCardLunch';
+        break;
+      case MealTime.dinner:
+        onCardField = 'onCardDinner';
+        break;
+    }
+
+    // ✅ remaining field + update remaining
+    String remainingField;
+    switch (result.mealTime) {
+      case MealTime.breakfast:
+        remainingField = 'remainingBreakfast';
+        break;
+      case MealTime.lunch:
+        remainingField = 'remainingLunch';
+        break;
+      case MealTime.dinner:
+        remainingField = 'remainingDinner';
+        break;
+    }
+    final currentRemaining = remaining(result.mealTime);
+    final newRemaining = currentRemaining - result.quantity;
+
+    // ✅ FIX: nema dupliranja quantity
+    final currentUsed = _usedThisMonth[result.mealTime]!;
+    String usedField;
+    switch (result.mealTime) {
+      case MealTime.breakfast:
+        usedField = 'usedBreakfast';
+        break;
+      case MealTime.lunch:
+        usedField = 'usedLunch';
+        break;
+      case MealTime.dinner:
+        usedField = 'usedDinner';
+        break;
+    }
+
+    await FirebaseFirestore.instance
+        .collection('students')
+        .doc(studentProvider.cardNumber)
+        .update({
+      onCardField: newOnCard,
+      usedField: currentUsed,
+      remainingField: newRemaining,
+    });
+
     final updatedStudent =
         Map<String, dynamic>.from(studentProvider.currentStudent ?? {});
     updatedStudent['balance'] = newBalance;
+    updatedStudent[onCardField] = newOnCard;
+    updatedStudent[usedField] = currentUsed;
+    updatedStudent[remainingField] = newRemaining;
     studentProvider.setCurrentStudent(updatedStudent);
 
     ScaffoldMessenger.of(context).showSnackBar(

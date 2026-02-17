@@ -68,6 +68,34 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
     }
   }
 
+  Future<void> _resetRemainingMeals(String cardNumber) async {
+    setState(() => _isLoading = true);
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('students')
+          .doc(cardNumber)
+          .update({
+        'remainingBreakfast': 30,
+        'remainingLunch': 30,
+        'remainingDinner': 30,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Remaining obroka je resetovan na 30'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Greška: $e')),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
   Future<void> _updateCardNumber(
       String oldCardNumber, String newCardNumber) async {
     setState(() => _isLoading = true);
@@ -248,6 +276,14 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                     const Icon(Icons.edit, color: Colors.blue),
                                 onPressed: () {
                                   _showEditDialog(student);
+                                },
+                              ),
+                            if (isActive)
+                              IconButton(
+                                icon: const Icon(Icons.refresh,
+                                    color: Colors.green),
+                                onPressed: () {
+                                  _resetRemainingMeals(cardNumber);
                                 },
                               ),
                           ],

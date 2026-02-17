@@ -9,6 +9,7 @@ import 'package:e_menza/widgets/title_text.dart';
 import 'package:provider/provider.dart';
 import 'package:e_menza/providers/student_providers.dart';
 import 'package:e_menza/screens/auth/forgot_pin_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginScreen extends StatefulWidget {
   static const String routeName = "/LoginScreen";
@@ -67,6 +68,26 @@ class _LoginScreenState extends State<LoginScreen> {
       if (success) {
         Navigator.of(context).pushReplacementNamed(RootScreen.routeName);
       } else {
+        // Proveri da li je student neaktivan
+        final cardNumber = _cardNumberController.text.trim();
+        final doc = await FirebaseFirestore.instance
+            .collection('students')
+            .doc(cardNumber)
+            .get();
+        
+        if (doc.exists) {
+          final isActive = doc.data()!['isActive'] ?? false;
+          if (!isActive) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Vaš nalog je deaktiviran. Kontaktirajte administratora.'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+            return;
+          }
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Pogrešan broj kartice ili PIN'),

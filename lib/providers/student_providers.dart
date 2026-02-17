@@ -82,8 +82,13 @@ class StudentProvider with ChangeNotifier {
 
       final data = doc.data()!;
       final storedPinHash = data['pinHash'] ?? '';
+      final isActive = data['isActive'] ?? false;
 
       if (storedPinHash.isEmpty) {
+        return false;
+      }
+
+      if (!isActive) {
         return false;
       }
 
