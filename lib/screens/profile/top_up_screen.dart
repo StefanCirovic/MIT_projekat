@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:e_menza/providers/student_providers.dart';
 
 class TopUpScreen extends StatefulWidget {
   const TopUpScreen({super.key});
@@ -14,6 +17,8 @@ class _TopUpScreenState extends State<TopUpScreen> {
   final _cardController = TextEditingController();
   final _expiryController = TextEditingController(); // MM/YY
   final _cvvController = TextEditingController();
+  bool _isLoading = false;
+
   @override
   void dispose() {
     _amountController.dispose();
@@ -39,8 +44,16 @@ class _TopUpScreenState extends State<TopUpScreen> {
   String? _cardValidator(String? v) {
     if (v == null || v.trim().isEmpty) return 'Unesi broj kartice';
     final digits = v.replaceAll(RegExp(r'\s+'), '');
-    if (digits.length < 15 || digits.length > 19)
-      return 'Broj kartice nije ispravan';
+    if (digits.length != 16)
+      return 'Broj kartice mora imati tačno 16 cifara';
+    return null;
+  }
+
+  String? _cvvValidator(String? v) {
+    if (v == null || v.trim().isEmpty) return 'Unesi CVV';
+    final digits = v.replaceAll(RegExp(r'\s+'), '');
+    if (digits.length != 3)
+      return 'CVV mora imati tačno 3 cifre';
     return null;
   }
 
@@ -59,7 +72,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
     final digits = input.replaceAll(RegExp(r'\s+'), '');
     if (digits.length <= 4) return digits;
     final last4 = digits.substring(digits.length - 4);
-    return '** ** ** $last4';
+    return '**** **** **** $last4';
   }
 
   Future<void> _submit() async {
@@ -67,29 +80,58 @@ class _TopUpScreenState extends State<TopUpScreen> {
     FocusScope.of(context).unfocus();
     if (!valid) return;
 
-    final amount = _amountController.text.replaceAll(',', '.');
-    final masked = _maskCard(_cardController.text);
+    setState(() => _isLoading = true);
 
-    await showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Uplata uspešna'),
-        content: Text(
-            'Kartica: $masked\nIznos: ${double.parse(amount).toStringAsFixed(2)} RSD'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+    try {
+      final amount = _amountController.text.replaceAll(',', '.');
+      final masked = _maskCard(_cardController.text);
 
-    Navigator.pop(context); // vrati se na profil
+      final studentProvider = Provider.of<StudentProvider>(context, listen: false);
+      final currentBalance = studentProvider.balance ?? 0.0;
+      final newBalance = currentBalance + double.parse(amount);
+
+      await FirebaseFirestore.instance
+          .collection('students')
+          .doc(studentProvider.cardNumber)
+          .update({'balance': newBalance});
+
+      final updatedStudent = Map<String, dynamic>.from(studentProvider.currentStudent ?? {});
+      updatedStudent['balance'] = newBalance;
+      studentProvider.setCurrentStudent(updatedStudent);
+
+      await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Uplata uspešna'),
+          content: Text(
+              'Kartica: $masked\nIznos: ${double.parse(amount).toStringAsFixed(2)} RSD\nNovo stanje: ${newBalance.toStringAsFixed(2)} RSD'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+
+      Navigator.pop(context); 
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Greška pri uplati: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final studentProvider = Provider.of<StudentProvider>(context);
+    final accountNumber = studentProvider.accountNumber ?? 'N/A';
+    
     return Scaffold(
       appBar: AppBar(title: const Text('Uplata sredstava')),
       body: Padding(
@@ -100,6 +142,42 @@ class _TopUpScreenState extends State<TopUpScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.account_balance, color: Theme.of(context).primaryColor),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Vaš žiro račun:',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              accountNumber,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: _amountController,
                   keyboardType:
@@ -154,7 +232,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
                         ),
                         keyboardType: TextInputType.number,
                         obscureText: true,
-                        validator: (v) => _notEmpty(v, 'CVV'),
+                        validator: _cvvValidator,
                       ),
                     ),
                   ],
@@ -163,9 +241,15 @@ class _TopUpScreenState extends State<TopUpScreen> {
                 SizedBox(
                   height: 48,
                   child: ElevatedButton.icon(
-                    onPressed: _submit,
-                    icon: const Icon(Icons.check_circle_outline),
-                    label: const Text('Potvrdi uplatu'),
+                    onPressed: _isLoading ? null : _submit,
+                    icon: _isLoading 
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.check_circle_outline),
+                    label: Text(_isLoading ? 'Uplata u toku...' : 'Potvrdi uplatu'),
                   ),
                 ),
               ],

@@ -68,7 +68,6 @@ class _LoginScreenState extends State<LoginScreen> {
       if (success) {
         Navigator.of(context).pushReplacementNamed(RootScreen.routeName);
       } else {
-        // Proveri da li je student neaktivan
         final cardNumber = _cardNumberController.text.trim();
         final doc = await FirebaseFirestore.instance
             .collection('students')
