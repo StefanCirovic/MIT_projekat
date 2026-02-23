@@ -97,7 +97,6 @@ class _AccountScreenState extends State<BuyScreen> {
         break;
     }
 
-    // ✅ remaining field + update remaining
     String remainingField;
     switch (result.mealTime) {
       case MealTime.breakfast:
@@ -113,7 +112,6 @@ class _AccountScreenState extends State<BuyScreen> {
     final currentRemaining = remaining(result.mealTime);
     final newRemaining = currentRemaining - result.quantity;
 
-    // ✅ FIX: nema dupliranja quantity
     final currentUsed = _usedThisMonth[result.mealTime]!;
     String usedField;
     switch (result.mealTime) {

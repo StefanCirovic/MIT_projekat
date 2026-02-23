@@ -135,7 +135,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(width: 12),
                     const Text(
-                      "FTN Script Store",
+                      "E Menza",
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -151,8 +151,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TitlesTextWidget(label: "Welcome back!"),
-                        SubtitleTextWidget(label: "Your welcome message"),
+                        TitlesTextWidget(label: "Welcome!"),
+                        SubtitleTextWidget(label: "New here?"),
                       ],
                     )),
                 const SizedBox(
